@@ -1,27 +1,27 @@
-# =====================================================================
-# Yemekhane Otomasyonu · Başlangıç paketi
-# Çalıştırma:   docker compose up -d
+﻿# =====================================================================
+# Yemekhane Otomasyonu Â· BaÅŸlangÄ±Ã§ paketi
+# Ã‡alÄ±ÅŸtÄ±rma:   docker compose up -d
 # Durum:        docker compose ps -a
-# Sıfırlama:    docker compose down -v   (tüm veri silinir, yeniden üretilir)
+# SÄ±fÄ±rlama:    docker compose down -v   (tÃ¼m veri silinir, yeniden Ã¼retilir)
 # =====================================================================
 name: yemekhane
 
-# Ortak ayarlar (YAML anchor). Ders ortamı içindir; şifreler bilerek açıktır.
+# Ortak ayarlar (YAML anchor). Ders ortamÄ± iÃ§indir; ÅŸifreler bilerek aÃ§Ä±ktÄ±r.
 x-mysql-ortak: &mysql-ortak
   image: mysql:8.4
   restart: unless-stopped
   healthcheck:
-    # 127.0.0.1 bilerek kullanılır: ilk kurulum sırasında sunucu yalnızca
-    # soket üzerinden açıktır, TCP yanıt vermeye başladığında kurulum bitmiştir.
+    # 127.0.0.1 bilerek kullanÄ±lÄ±r: ilk kurulum sÄ±rasÄ±nda sunucu yalnÄ±zca
+    # soket Ã¼zerinden aÃ§Ä±ktÄ±r, TCP yanÄ±t vermeye baÅŸladÄ±ÄŸÄ±nda kurulum bitmiÅŸtir.
     test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "--silent"]
     interval: 5s
     timeout: 5s
     retries: 30
     start_period: 60s
 
-# Uygulama servisinin alacağı ortam değişkenleri.
-# Container'lar birbirine servis adıyla ve İÇ portla (3306, 6379) bağlanır.
-# 3307 / 3308 yalnızca kendi bilgisayarınızdan (DBeaver, Workbench) bağlanmak içindir.
+# Uygulama servisinin alacaÄŸÄ± ortam deÄŸiÅŸkenleri.
+# Container'lar birbirine servis adÄ±yla ve Ä°Ã‡ portla (3306, 6379) baÄŸlanÄ±r.
+# 3307 / 3308 yalnÄ±zca kendi bilgisayarÄ±nÄ±zdan (DBeaver, Workbench) baÄŸlanmak iÃ§indir.
 x-uygulama-ortam: &uygulama-ortam
   TZ: Europe/Istanbul
   DB_YAZMA_HOST: mysql-primary
@@ -36,7 +36,7 @@ x-uygulama-ortam: &uygulama-ortam
 services:
 
   # ---------------------------------------------------------------
-  # Kaynak (yazma) veritabanı · şema ve örnek veri ilk açılışta yüklenir
+  # Kaynak (yazma) veritabanÄ± Â· ÅŸema ve Ã¶rnek veri ilk aÃ§Ä±lÄ±ÅŸta yÃ¼klenir
   # ---------------------------------------------------------------
   mysql-primary:
     <<: *mysql-ortak
@@ -56,7 +56,7 @@ services:
       - mysql-primary-veri:/var/lib/mysql
 
   # ---------------------------------------------------------------
-  # Replika (okuma) veritabanı · veriyi replica-setup ile kaynaktan alır
+  # Replika (okuma) veritabanÄ± Â· veriyi replica-setup ile kaynaktan alÄ±r
   # ---------------------------------------------------------------
   mysql-replica:
     <<: *mysql-ortak
@@ -72,8 +72,8 @@ services:
       - mysql-replica-veri:/var/lib/mysql
 
   # ---------------------------------------------------------------
-  # Replikayı bir kez kurar, salt okunur yapar ve çıkar (exit 0).
-  # Replika zaten kuruluysa hiçbir şey yapmadan çıkar.
+  # ReplikayÄ± bir kez kurar, salt okunur yapar ve Ã§Ä±kar (exit 0).
+  # Replika zaten kuruluysa hiÃ§bir ÅŸey yapmadan Ã§Ä±kar.
   # ---------------------------------------------------------------
   replica-setup:
     image: mysql:8.4
@@ -95,7 +95,7 @@ services:
         condition: service_healthy
 
   # ---------------------------------------------------------------
-  # Redis · menü önbelleği ve oturum deposu (AOF açık, yeniden başlatmada veri kalır)
+  # Redis Â· menÃ¼ Ã¶nbelleÄŸi ve oturum deposu (AOF aÃ§Ä±k, yeniden baÅŸlatmada veri kalÄ±r)
   # ---------------------------------------------------------------
   redis:
     image: redis:7.4-alpine
@@ -112,15 +112,15 @@ services:
       retries: 10
 
   # ---------------------------------------------------------------
-  # Apache 2.4 · HTML/CSS'i sunar, uygulama isteklerini uygulama servisine iletir.
-  # Mod seçimi: aşağıdaki "-D WEBAPI" değerini MVC yolunu seçtiyseniz "-D MVC" yapın.
+  # Apache 2.4 Â· HTML/CSS'i sunar, uygulama isteklerini uygulama servisine iletir.
+  # Mod seÃ§imi: aÅŸaÄŸÄ±daki "-D WEBAPI" deÄŸerini MVC yolunu seÃ§tiyseniz "-D MVC" yapÄ±n.
   # ---------------------------------------------------------------
   frontend:
     build: ./apache
     restart: unless-stopped
     command: ["httpd-foreground", "-D", "WEBAPI"]
     environment:
-      # Uygulamanızın container içinde dinlediği adres. Port farklıysa burayı değiştirin.
+      # UygulamanÄ±zÄ±n container iÃ§inde dinlediÄŸi adres. Port farklÄ±ysa burayÄ± deÄŸiÅŸtirin.
       UYGULAMA_ADRES: http://uygulama:8000
     ports:
       - "8080:80"
@@ -133,25 +133,26 @@ services:
       retries: 5
 
   # ---------------------------------------------------------------
-  # UYGULAMA · BU SERVİSİ SİZ YAZACAKSINIZ (Aşama 2)
-  # 1. ./uygulama klasörüne kodunuzu ve Dockerfile'ı koyun.
-  # 2. Uygulama container içinde 8000 portunu dinlesin (ya da UYGULAMA_ADRES'i değiştirin).
-  # 3. Aşağıdaki satırların başındaki "# " işaretlerini kaldırın.
+  # UYGULAMA Â· BU SERVÄ°SÄ° SÄ°Z YAZACAKSINIZ (AÅŸama 2)
+  # 1. ./uygulama klasÃ¶rÃ¼ne kodunuzu ve Dockerfile'Ä± koyun.
+  # 2. Uygulama container iÃ§inde 8000 portunu dinlesin (ya da UYGULAMA_ADRES'i deÄŸiÅŸtirin).
+  # 3. AÅŸaÄŸÄ±daki satÄ±rlarÄ±n baÅŸÄ±ndaki "# " iÅŸaretlerini kaldÄ±rÄ±n.
   # ---------------------------------------------------------------
-  # uygulama:
-  #   build: ./uygulama
-  #   restart: unless-stopped
-  #   environment:
-  #     <<: *uygulama-ortam
-  #   depends_on:
-  #     mysql-primary:
-  #       condition: service_healthy
-  #     redis:
-  #       condition: service_healthy
-  #     replica-setup:
-  #       condition: service_completed_successfully
+  uygulama:
+    build: ./uygulama
+    restart: unless-stopped
+    environment:
+      <<: *uygulama-ortam
+    depends_on:
+      mysql-primary:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      replica-setup:
+        condition: service_completed_successfully
 
 volumes:
   mysql-primary-veri:
   mysql-replica-veri:
   redis-veri:
+
